@@ -16,7 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class FilterTaskAuth extends OncePerRequestFilter{
 
-    
+    @Autowired
     private IUserRepository userRepository;
 
     @Override
