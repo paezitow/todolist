@@ -27,18 +27,18 @@ public class TaskController {
     @Autowired
     private ITaskRepository taskRepository;
     
-    @GetMapping("/")
+    @GetMapping("/get")
     public ResponseEntity<List<TaskModel>> list(HttpServletRequest request){
         var idUser = request.getAttribute("idUser");
         return ResponseEntity.status(HttpStatus.OK).body(this.taskRepository.findByIdUser((UUID)idUser));
         
     }
 
-    @PostMapping
+    @PostMapping("/post")
     public ResponseEntity<String> creatTask(@RequestBody TaskModel taskModel, HttpServletRequest request){
 
         var idUser = request.getAttribute("idUser");
-        taskModel.setUserId((UUID)idUser);
+        taskModel.setIdUser((UUID)idUser);
 
         var currentDate = LocalDateTime.now();
 
@@ -57,6 +57,7 @@ public class TaskController {
 
     @PutMapping("/{idTask}")
     public ResponseEntity<String> updateTask(@RequestBody TaskModel taskModel,  HttpServletRequest request, @PathVariable UUID idTask){
+        
         var idUser = request.getAttribute("idUser");
         var task = this.taskRepository.findById(idTask).orElse(null);
 
@@ -65,14 +66,14 @@ public class TaskController {
         }
 
         
-        if(!task.getUserId().equals(idUser)){
+        if(!task.getIdUser().equals(idUser)){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuário não tem permissão para atualizar esta tarefa.");
         }
         
         Utils.copyNunNullProperties(taskModel, task);
         
-        taskModel.setUserId((UUID) idUser);
-        taskModel.setId(idTask);
+        var taskUpdated = this.taskRepository.save(task);
+        this.taskRepository.save(taskUpdated);
         return ResponseEntity.status(HttpStatus.OK).body("Tarefa atualizada com sucesso!");
     }
 }
