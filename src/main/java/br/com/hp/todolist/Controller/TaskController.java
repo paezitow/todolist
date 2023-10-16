@@ -29,36 +29,40 @@ public class TaskController {
     
     @GetMapping("/get")
     public ResponseEntity<List<TaskModel>> list(HttpServletRequest request){
-        var idUser = request.getAttribute("idUser");
-        return ResponseEntity.status(HttpStatus.OK).body(this.taskRepository.findByIdUser((UUID)idUser));
+        var idUser = UUID.fromString( request.getHeader("idUser").trim());
+        return ResponseEntity.status(HttpStatus.OK).body(this.taskRepository.findByIdUser(idUser));
         
     }
 
     @PostMapping("/post")
     public ResponseEntity<String> creatTask(@RequestBody TaskModel taskModel, HttpServletRequest request){
 
-        var idUser = request.getAttribute("idUser");
-        taskModel.setIdUser((UUID)idUser);
-
+        var idUser = UUID.fromString( request.getHeader("idUser").trim());
         var currentDate = LocalDateTime.now();
-
+        
         
         if(currentDate.isAfter(taskModel.getStartAt()) || currentDate.isAfter(taskModel.getEndAt())){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("A data de inicio e (ou) término deve ser maior que a data atual.");
         }
-
+        
         if(taskModel.getStartAt().isAfter(taskModel.getEndAt())){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("A data de inicio deve ser anterior a data de término.");
         }
         
-        this.taskRepository.save(taskModel);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Tarefa criada com sucesso!");
+        taskModel.setIdUser(idUser);
+        var taskCreated = this.taskRepository.save(taskModel);
+        if(taskCreated != null){
+
+            return ResponseEntity.status(HttpStatus.CREATED).header("idTask", taskModel.getId().toString()).body("Tarefa criada com sucesso!");
+        }else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Houve um erro na criação da tarefa");
+        }
     }
 
     @PutMapping("/{idTask}")
     public ResponseEntity<String> updateTask(@RequestBody TaskModel taskModel,  HttpServletRequest request, @PathVariable UUID idTask){
         
-        var idUser = request.getAttribute("idUser");
+        var idUser = UUID.fromString( request.getHeader("idUser").trim());
         var task = this.taskRepository.findById(idTask).orElse(null);
 
         if(task == null){
