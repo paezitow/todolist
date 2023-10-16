@@ -19,7 +19,7 @@ public class UserController {
     @Autowired
     private IUserRepository userRepository;
 
-    @PostMapping
+    @PostMapping("/post")
     public ResponseEntity<String> postUser(@RequestBody UserModel userModel){
         var user = this.userRepository.findByUsername(userModel.getUsername());
 
@@ -31,6 +31,6 @@ public class UserController {
         userModel.setPassword(passwordHash);
 
         this.userRepository.save(userModel);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Usuário criado");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Usuário criado!");
     }
 }
