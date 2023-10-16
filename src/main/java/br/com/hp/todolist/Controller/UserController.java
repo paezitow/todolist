@@ -13,7 +13,7 @@ import br.com.hp.todolist.Model.UserModel;
 import br.com.hp.todolist.Repository.IUserRepository;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 public class UserController {
     
     @Autowired
@@ -29,8 +29,7 @@ public class UserController {
 
         var passwordHash = BCrypt.withDefaults().hashToString(12, userModel.getPassword().toCharArray());
         userModel.setPassword(passwordHash);
-
         this.userRepository.save(userModel);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Usuário criado!");
+        return ResponseEntity.status(HttpStatus.CREATED).header("idUser",userModel.getId().toString()).body("Usuário criado!");
     }
 }
